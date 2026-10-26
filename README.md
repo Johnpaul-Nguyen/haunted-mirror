@@ -52,6 +52,31 @@ camera or press Enter.
 
 ## Run it on the UNO Q
 
+**Over USB, no network needed (tested).** Plug the board into the laptop with a
+data cable, then from the laptop:
+
+```bash
+scripts/deploy-uno-q.sh --start
+```
+
+It copies the committed project over adb, unpacks ARM64 OpenCV and numpy into
+`.pylib` (the board has no pip and `sudo` needs a password), runs the tests on
+the board and starts the mirror. To see it from the laptop:
+`adb forward tcp:8667 tcp:8666`, then open http://localhost:8667.
+
+To show it on the board's own monitor, log in on the board's desktop, then:
+
+```bash
+adb shell "DISPLAY=:0 chromium --kiosk --autoplay-policy=no-user-gesture-required http://localhost:8666 >/dev/null 2>&1 &"
+```
+
+Without Wi-Fi the board runs the offline ghost with no weather and no voice
+input. Plug a USB camera into the board for presence and mood; it's found
+automatically (the board's own `/dev/video0` and `video1` are its video codec,
+not cameras).
+
+**With Wi-Fi and sudo**, the classic install also works:
+
 ```bash
 sudo apt update && sudo apt install -y python3-opencv chromium speech-dispatcher espeak-ng git
 git clone https://github.com/Johnpaul-Nguyen/haunted-mirror.git

@@ -132,6 +132,7 @@ body[data-mood="care"] #ghost { opacity: 0 !important; }
   white-space: nowrap;
 }
 #plaque span:empty { display: none; }
+#plaque:has(#weather:empty):has(#facemood:empty) { visibility: hidden; }
 #facemood { color: #b4c8cc; font-size: 0.85em; }
 
 /* ---------- words ---------- */
