@@ -45,7 +45,8 @@ echo "Running tests on the board..."
 if [ "${1:-}" = "--autostart" ]; then
   "$ADB" shell "mkdir -p ~/.config/autostart && printf '%s\n' '[Desktop Entry]' 'Type=Application' \
     'Name=Haunted Mirror' 'Exec=$DEST/kiosk.sh' 'X-GNOME-Autostart-enabled=true' \
-    > ~/.config/autostart/haunted-mirror.desktop && cat ~/.config/autostart/haunted-mirror.desktop"
+    > ~/.config/autostart/haunted-mirror.desktop && chmod 644 ~/.config/autostart/haunted-mirror.desktop && \
+    cat ~/.config/autostart/haunted-mirror.desktop"  # adb's umask is 000; don't leave a login command world-writable
   echo "Autostart installed: the mirror opens full-screen when someone logs in on the board."
 fi
 
