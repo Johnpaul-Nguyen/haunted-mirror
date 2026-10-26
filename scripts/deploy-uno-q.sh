@@ -4,6 +4,8 @@
 #
 #   scripts/deploy-uno-q.sh          copy, unpack, run tests on the board
 #   scripts/deploy-uno-q.sh --start  ...then (re)start the mirror on the board
+#   scripts/deploy-uno-q.sh --autostart  ...and open it full-screen at every desktop login
+#                                        (undo: rm ~/.config/autostart/haunted-mirror.desktop)
 set -euo pipefail
 export MSYS_NO_PATHCONV=1  # stop Git Bash rewriting /home/... into Windows paths
 
@@ -34,13 +36,20 @@ git archive --format=tar -o "$CACHE/mirror.tar" HEAD
 [ -f .env ] && "$ADB" push .env "$DEST/.env" >/dev/null
 
 # The board's clock may be wrong without network; silence tar's timestamp warnings.
-"$ADB" shell "cd $DEST && tar -xmf /tmp/mirror.tar && chmod +x run.sh && \
+"$ADB" shell "cd $DEST && tar -xmf /tmp/mirror.tar && chmod +x run.sh kiosk.sh && \
   for w in /tmp/mirror-wheels/*.whl; do python3 -m zipfile -e \"\$w\" .pylib/; done"
 
 echo "Running tests on the board..."
 "$ADB" shell "cd $DEST && PYTHONPATH=.pylib python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -2"
 
-if [ "${1:-}" = "--start" ]; then
+if [ "${1:-}" = "--autostart" ]; then
+  "$ADB" shell "mkdir -p ~/.config/autostart && printf '%s\n' '[Desktop Entry]' 'Type=Application' \
+    'Name=Haunted Mirror' 'Exec=$DEST/kiosk.sh' 'X-GNOME-Autostart-enabled=true' \
+    > ~/.config/autostart/haunted-mirror.desktop && cat ~/.config/autostart/haunted-mirror.desktop"
+  echo "Autostart installed: the mirror opens full-screen when someone logs in on the board."
+fi
+
+if [ "${1:-}" = "--start" ] || [ "${1:-}" = "--autostart" ]; then
   # '[p]ython3' so pkill doesn't match (and kill) this very shell command.
   "$ADB" shell "pkill -f '[p]ython3 app.py' || true; cd $DEST && setsid -f ./run.sh > /tmp/mirror.log 2>&1 < /dev/null; sleep 4; tail -3 /tmp/mirror.log"
   echo "Started. Log: $ADB shell tail -f /tmp/mirror.log"

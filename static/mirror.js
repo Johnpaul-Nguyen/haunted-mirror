@@ -398,6 +398,12 @@ if (!cameraOn) reflection.classList.add("missing");
 updateMic();
 poll();
 
+// Kiosk (board autostart): nobody is there to press a key, and Chromium is
+// launched with autoplay allowed, so pull back the cloth straight away.
+if (new URLSearchParams(location.search).has("kiosk")) {
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
+}
+
 // Now and then the reflection is not quite yours.
 (function glitch() {
   setTimeout(() => {
