@@ -3,89 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Spirit Board</title>
+  <title>Haunted Mirror</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/mirror.css">
 </head>
-<body class="asleep">
+<body class="asleep" data-mood="calm">
   <div id="veil">
-    <h1>THE BOARD IS VEILED</h1>
-    <p>press any key to lift it</p>
+    <h1>THE MIRROR IS COVERED</h1>
+    <p>press any key to pull back the cloth</p>
   </div>
 
   <main id="stage">
-    <div id="boardwrap">
-      <div id="board">
-        <div class="title">M O R T I S</div>
-        <div class="glyph mark" style="left:330px;top:95px">&#x2739;&#xFE0E;</div>
-        <div class="glyph mark" style="left:670px;top:95px">&#x263E;&#xFE0E;</div>
-        <svg id="planchette" width="130" height="162" viewBox="0 0 130 162">
+    <div id="frame">
+      <div id="glass">
+        <img id="reflection" alt="">
+        <svg id="ghost" viewBox="0 0 200 300" aria-hidden="true">
           <defs>
-            <radialGradient id="bone" cx="50%" cy="40%" r="70%">
-              <stop offset="0" stop-color="#e2d6bc"/>
-              <stop offset="0.7" stop-color="#a8987a"/>
-              <stop offset="1" stop-color="#5e523e"/>
-            </radialGradient>
-            <radialGradient id="glass" cx="40%" cy="35%" r="70%">
-              <stop offset="0" stop-color="#5a1010" stop-opacity="0.35"/>
-              <stop offset="1" stop-color="#000" stop-opacity="0.75"/>
+            <filter id="haze"><feGaussianBlur stdDeviation="2.2"/></filter>
+            <radialGradient id="pale" cx="50%" cy="38%" r="60%">
+              <stop offset="0" stop-color="#e8f0f2"/>
+              <stop offset="0.65" stop-color="#9fb0b5"/>
+              <stop offset="1" stop-color="#9fb0b5" stop-opacity="0"/>
             </radialGradient>
           </defs>
-          <path d="M65 4 C 85 30, 125 80, 122 112 C 119 145, 95 158, 65 158 C 35 158, 11 145, 8 112 C 5 80, 45 30, 65 4 Z"
-                fill="url(#bone)" stroke="#2a1f14" stroke-width="3"/>
-          <circle cx="65" cy="90" r="27" fill="url(#glass)" stroke="#2a1f14" stroke-width="5"/>
-          <ellipse cx="56" cy="80" rx="7" ry="4" fill="#fff" opacity="0.25"/>
-          <circle cx="65" cy="140" r="3" fill="#2a1f14"/>
+          <g filter="url(#haze)">
+            <path d="M40 300 C 30 180, 40 60, 100 40 C 160 60, 170 180, 160 300 Z" fill="#060708" opacity="0.9"/>
+            <ellipse cx="100" cy="115" rx="44" ry="58" fill="url(#pale)"/>
+            <ellipse cx="82" cy="108" rx="11" ry="15" fill="#020202"/>
+            <ellipse cx="118" cy="108" rx="11" ry="15" fill="#020202"/>
+            <ellipse cx="100" cy="150" rx="7" ry="12" fill="#020202" opacity="0.85"/>
+            <path d="M58 70 C 70 40, 130 40, 142 70 C 130 60, 70 60, 58 70 Z" fill="#060708"/>
+          </g>
         </svg>
+        <svg id="cracks" viewBox="0 0 300 400" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M300 40 L250 70 L262 96 L214 128 M250 70 L232 52 M262 96 L290 120"/>
+          <path d="M0 330 L40 314 L58 340 L96 326 M40 314 L30 290"/>
+        </svg>
+        <div id="fogglass"></div>
+        <div id="scarer" aria-hidden="true">
+          <svg viewBox="0 0 200 260">
+            <ellipse cx="100" cy="120" rx="80" ry="110" fill="#c9d3d5"/>
+            <ellipse cx="68" cy="100" rx="22" ry="30" fill="#000" transform="rotate(-10 68 100)"/>
+            <ellipse cx="132" cy="100" rx="22" ry="30" fill="#000" transform="rotate(10 132 100)"/>
+            <circle cx="70" cy="106" r="3" fill="#fff"/>
+            <circle cx="130" cy="106" r="3" fill="#fff"/>
+            <ellipse cx="100" cy="190" rx="20" ry="45" fill="#000"/>
+          </svg>
+        </div>
+      </div>
+      <div id="plaque">
+        <span id="weather"></span>
+        <span id="facemood"></span>
       </div>
     </div>
-    <div id="asked"></div>
-    <div id="whisper"></div>
-    <form id="ask" autocomplete="off">
-      <span>&#x203A;</span>
-      <input id="q" maxlength="500" placeholder="speak to the board..." disabled>
+
+    <p id="heard"></p>
+    <p id="words"></p>
+
+    <form id="talk" autocomplete="off">
+      <button id="mic" type="button" title="Speak (F2)" aria-label="Speak to the mirror" hidden>
+        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12z"/></svg>
+      </button>
+      <input id="say" maxlength="500" placeholder="speak to the glass..." disabled>
     </form>
+    <p id="voicenote"></p>
   </main>
 
-  <div id="sleep"><p id="sleeptext">the board is cold</p></div>
-
-  <div id="scry" hidden>
-    <img id="scryimg" alt="">
-    <span id="scrylabel">IT SEES NO ONE</span>
-  </div>
+  <div id="sleep"><p id="sleeptext">the glass is cold</p></div>
   <div id="hud"></div>
 
-  <div id="scare" aria-hidden="true">
-    <svg viewBox="0 0 400 500">
-      <defs>
-        <filter id="warp">
-          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" result="n">
-            <animate attributeName="baseFrequency" values="0.018;0.03;0.012" dur="0.4s" repeatCount="indefinite"/>
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="26"/>
-        </filter>
-        <radialGradient id="skin" cx="50%" cy="40%" r="60%">
-          <stop offset="0" stop-color="#d8d2c6"/>
-          <stop offset="0.6" stop-color="#8d877c"/>
-          <stop offset="1" stop-color="#1a1816"/>
-        </radialGradient>
-      </defs>
-      <g filter="url(#warp)">
-        <ellipse cx="200" cy="240" rx="150" ry="210" fill="url(#skin)"/>
-        <ellipse cx="135" cy="195" rx="42" ry="55" fill="#050404" transform="rotate(-12 135 195)"/>
-        <ellipse cx="265" cy="195" rx="42" ry="55" fill="#050404" transform="rotate(12 265 195)"/>
-        <circle cx="140" cy="205" r="6" fill="#ff1a0a"/>
-        <circle cx="260" cy="205" r="6" fill="#ff1a0a"/>
-        <ellipse cx="200" cy="360" rx="38" ry="80" fill="#050404"/>
-      </g>
-    </svg>
-  </div>
-
-  <div class="fog"></div>
   <div class="grain"></div>
   <div class="vignette"></div>
-  <script src="/board.js"></script>
+  <script src="/logic.js"></script>
+  <script src="/mirror.js"></script>
 </body>
 </html>

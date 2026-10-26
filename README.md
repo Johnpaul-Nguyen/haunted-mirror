@@ -1,93 +1,111 @@
-# Spirit Board
+# Haunted Mirror
 
-A haunted Ouija board that tutors you. Sit in front of it and a spirit called
-MORTIS wakes with a jump scare. Name any topic and it teaches you one idea at a
-time, then quizzes you. The planchette spells its verdict across the board.
-Get it wrong and it mocks you, then explains the right answer.
+A mirror with a ghost in it who checks on you every day. Stand in front of it
+and VESPER wakes with a jump scare. She tells you what she sees in your face,
+gives you the weather and what to wear, then asks how you really are. Talk to
+her by voice or keyboard. She listens and, if you seem low, gives you one small,
+concrete thing to do.
 
 Built for Hacktoberfest 2026 on the Arduino UNO Q.
 
 ## Why it helps
 
-Active recall (being quizzed) beats rereading notes. Most people skip it because
-it's dull. MORTIS makes it hard to skip. It works for any subject, and it adapts
-the next question to how you answered the last one.
+People who live alone can go a whole day without anyone asking how they are.
+Vesper asks, every time you walk past. She is creepy on purpose, which makes the
+check-in fun instead of clinical, but underneath the act she cares.
+
+If someone mentions self-harm or suicide, the server drops the ghost act and
+gives the 988 Suicide and Crisis Lifeline. That check is plain code, not the AI
+model, so it runs even offline and can't be talked out of it.
 
 ## How the AI is split
 
-| Part | Where it runs | What it does |
+| Part | Runs on | Does |
 |---|---|---|
-| Presence detection | On the board (OpenCV face detector) | Wakes the spirit when you sit down, sleeps it when you leave. No network needed. |
-| Tutor | Cloud LLM (DigitalOcean Gradient by default) | Explains, quizzes and judges answers in character. |
-| Offline spirit | On the board | Built-in quiz bank (computer science, science, history) for when there's no key or no Wi-Fi. |
-
-The cloud side uses any OpenAI-compatible endpoint, so DigitalOcean, Ollama or
-OpenAI all work by changing `.env`. If the cloud call fails mid-seance, the board
-switches to the offline spirit instead of freezing.
+| Presence | Board (OpenCV face + profile detectors) | Wakes Vesper when you arrive, sleeps her when you leave |
+| Mood guess | Board (OpenCV smile + eye detectors) | Rough guess: smiling, tired or neutral. No image leaves the board |
+| Conversation | Cloud LLM (DigitalOcean Gradient by default) | The check-in itself, in character |
+| Offline ghost | Board | Scripted check-in when there's no key or no Wi-Fi |
+| Weather | Open-Meteo (free, no key) | Forecast and outfit advice for your city |
+| Voice | Browser speech APIs | Speech in and out, with keyboard as the fallback |
 
 ## Hardware
 
 - Arduino UNO Q (Qualcomm Dragonwing QRB2210 running Debian, STM32U585 MCU)
-- USB camera
-- Monitor, keyboard (and mouse to click past the veil)
+- USB camera (with a mic, for voice)
+- Monitor with speakers, keyboard
 
 ## Run it on a laptop
 
-Needs Python 3.10 or newer.
+Needs Python 3.10+.
 
 ```bash
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt     # Windows: .venv\Scripts\pip
-cp .env.example .env                          # add your key, or leave blank for offline
+cp .env.example .env                          # set SPIRIT_CITY; add a key or leave blank for offline
 .venv/bin/python app.py
 ```
 
-Open http://localhost:8666, press any key to lift the veil (browsers need a key
-press before they play sound), then sit in front of the camera or press Enter.
+Open http://localhost:8666 in Chrome, press any key to pull back the cloth
+(browsers need a key press before they play sound), then stand in front of the
+camera or press Enter.
 
 ## Run it on the UNO Q
 
-The UNO Q's Linux side is Debian on ARM64. Plug in the monitor, keyboard and
-USB camera, open a terminal on the board (or SSH in), then:
-
 ```bash
-sudo apt update && sudo apt install -y python3-opencv chromium git
-git clone https://github.com/Johnpaul-Nguyen/spirit-board.git
-cd spirit-board
+sudo apt update && sudo apt install -y python3-opencv chromium speech-dispatcher espeak-ng git
+git clone https://github.com/Johnpaul-Nguyen/haunted-mirror.git
+cd haunted-mirror
 cp .env.example .env && nano .env
 python3 app.py &
 chromium --kiosk --autoplay-policy=no-user-gesture-required http://localhost:8666
 ```
 
-Use the apt OpenCV, not pip. It's prebuilt for ARM and saves a long compile. If the
-camera isn't found, try `SPIRIT_CAMERA=1` in `.env` (`ls /dev/video*` lists them).
+Use the apt OpenCV, not pip: it's prebuilt for ARM. `espeak-ng` gives Chromium a
+voice to speak with. If the camera isn't found, set `SPIRIT_CAMERA=1`
+(`ls /dev/video*` lists them).
+
+**Voice input on the board is the risky part.** Chromium's speech recognition
+sends audio to Google and doesn't work in every Linux build. If it fails, the
+mirror says so, hides the mic button and keeps working by keyboard.
 
 ## Get a DigitalOcean key
 
 1. Redeem your credit code in the DigitalOcean control panel (Billing).
-2. Go to Agent Platform / Gradient AI, then Serverless Inference, and create a model access key.
-3. Put it in `.env` as `SPIRIT_API_KEY`. Check the model list on that page and set
-   `SPIRIT_MODEL` to one that's available (for example `llama3.3-70b-instruct` or `openai-gpt-oss-120b`).
+2. Gradient AI → Serverless Inference → create a model access key.
+3. Put it in `.env` as `SPIRIT_API_KEY`. Set `SPIRIT_MODEL` to a model listed on
+   that page (for example `llama3.3-70b-instruct`).
 4. Restart `app.py`. The bottom-left corner shows `CLOUD:<model>` when it's live.
 
 ## Controls
 
-- Any key: lift the veil
-- Enter (while asleep): summon without the camera
-- Type and press Enter: answer or ask
-- Type `goodbye`: end the seance
+- Any key: pull back the cloth
+- Enter (while asleep): wake her without the camera
+- F2 or the mic button: speak. After you speak, she listens again once she finishes replying
+- Type and press Enter: reply by keyboard
+- Say or type `goodbye`: end the visit
+
+## Tests
+
+```bash
+.venv/bin/python -m pytest          # weather, presence/mood, ghost, safety, HTTP server
+node --test tests/logic.test.js     # browser logic: state machine, voice helpers
+```
+
+The camera loop, the real speech APIs and the cloud model can't be unit tested.
+They were checked by hand in the browser.
 
 ## Files
 
-- `app.py`: web server and API, standard library only
-- `spirit.py`: prompt, cloud client, offline quiz bank
-- `presence.py`: camera face detection and the red "scrying glass" view
-- `static/`: the board, planchette, jump scare and synthesised sound
+- `app.py`: web server, API and the MJPEG mirror stream (standard library only)
+- `ghost.py`: Vesper's prompt, safety check, cloud client and offline script
+- `presence.py`: camera loop, presence and mood tracking
+- `weather.py`: Open-Meteo forecast and outfit advice
+- `static/logic.js`: browser logic with no DOM, tested by Node
+- `static/mirror.js`, `mirror.css`, `index.html`: the mirror, ghost, sound and voice
 
 ## Not done yet
 
-- The MCU side (STM32) is unused. The built-in LED matrix could show the
-  spirit's eyes through the Arduino Bridge.
-- Modulino sensors aren't wired in. A buzzer on summon or knob-controlled
-  difficulty would be easy additions.
-- Not yet tested on the UNO Q itself or against a live DigitalOcean key.
+- Not tested on the UNO Q itself or with a live DigitalOcean key.
+- The STM32 MCU and the Modulino sensors are unused.
+- The mood guess is rough: lighting, glasses and head angle all fool it.
