@@ -1,4 +1,30 @@
-from presence import MoodTracker, PresenceTracker
+from presence import MoodTracker, PresenceTracker, find_camera
+
+
+class FakeCap:
+    def __init__(self, opened, frames):
+        self.opened, self.frames, self.released = opened, frames, False
+
+    def isOpened(self):
+        return self.opened
+
+    def read(self):
+        return (True, "frame") if self.frames else (False, None)
+
+    def release(self):
+        self.released = True
+
+
+def test_find_camera_skips_devices_that_open_but_give_no_frames():
+    # UNO Q: video0/video1 are the Qualcomm codec, the USB camera comes after them.
+    caps = {0: FakeCap(True, False), 1: FakeCap(True, False), 2: FakeCap(True, True)}
+    index, cap = find_camera([0, 1, 2, 3], lambda i: caps.get(i, FakeCap(False, False)))
+    assert index == 2 and cap is caps[2]
+    assert caps[0].released and caps[1].released and not caps[2].released
+
+
+def test_find_camera_none_found():
+    assert find_camera([0, 1], lambda i: FakeCap(False, False)) == (None, None)
 
 
 def test_presence_needs_consecutive_hits_to_arrive():

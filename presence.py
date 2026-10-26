@@ -17,6 +17,17 @@ except ImportError:
     cv2 = None
 
 
+def find_camera(candidates, open_fn, tries=5):
+    """First device that actually delivers a frame. Some open fine and never do
+    (on the UNO Q, /dev/video0 and video1 are the Qualcomm video codec)."""
+    for index in candidates:
+        cap = open_fn(index)
+        if cap.isOpened() and any(cap.read()[0] for _ in range(tries)):
+            return index, cap
+        cap.release()
+    return None, None
+
+
 class PresenceTracker:
     """Debounces raw face detections into 'someone is here' / 'they left'."""
 
@@ -71,7 +82,9 @@ class MoodTracker:
 
 class Presence:
     def __init__(self, camera_index=None):
-        self.camera_index = int(camera_index if camera_index is not None else os.environ.get("SPIRIT_CAMERA", 0))
+        chosen = camera_index if camera_index is not None else os.environ.get("SPIRIT_CAMERA", "")
+        self.candidates = [int(chosen)] if str(chosen).strip() else list(range(6))
+        self.camera_index = None
         self.enabled = False
         self.error = None
         self.tracker = PresenceTracker()
@@ -113,11 +126,16 @@ class Presence:
         eye_det = cascade("haarcascade_eye_tree_eyeglasses.xml")  # the plain one misses eyes behind glasses
 
         backend = cv2.CAP_DSHOW if sys.platform == "win32" else cv2.CAP_ANY
-        cap = cv2.VideoCapture(self.camera_index, backend)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        if not cap.isOpened():
-            self.error = f"camera {self.camera_index} not found"
+
+        def open_camera(index):
+            cap = cv2.VideoCapture(index, backend)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            return cap
+
+        self.camera_index, cap = find_camera(self.candidates, open_camera)
+        if cap is None:
+            self.error = f"no working camera (tried {self.candidates})"
             print(f"[presence] {self.error}: presence disabled")
             return
         self.enabled = True
