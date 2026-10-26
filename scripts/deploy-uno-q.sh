@@ -41,7 +41,8 @@ echo "Running tests on the board..."
 "$ADB" shell "cd $DEST && PYTHONPATH=.pylib python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -2"
 
 if [ "${1:-}" = "--start" ]; then
-  "$ADB" shell "pkill -f 'python3 app.py' || true; cd $DEST && nohup ./run.sh > /tmp/mirror.log 2>&1 < /dev/null & sleep 4; tail -5 /tmp/mirror.log"
+  # '[p]ython3' so pkill doesn't match (and kill) this very shell command.
+  "$ADB" shell "pkill -f '[p]ython3 app.py' || true; cd $DEST && nohup ./run.sh > /tmp/mirror.log 2>&1 < /dev/null & sleep 4; tail -5 /tmp/mirror.log"
   echo "Started. Log: $ADB shell tail -f /tmp/mirror.log"
   echo "View it from the laptop: $ADB forward tcp:8667 tcp:8666, then open http://localhost:8667"
 fi

@@ -1,0 +1,2 @@
+# Scripts run on the Linux board; CRLF breaks their #! line.
+*.sh text eol=lf
