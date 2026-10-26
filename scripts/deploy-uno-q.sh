@@ -42,7 +42,7 @@ echo "Running tests on the board..."
 
 if [ "${1:-}" = "--start" ]; then
   # '[p]ython3' so pkill doesn't match (and kill) this very shell command.
-  "$ADB" shell "pkill -f '[p]ython3 app.py' || true; cd $DEST && nohup ./run.sh > /tmp/mirror.log 2>&1 < /dev/null & sleep 4; tail -5 /tmp/mirror.log"
+  "$ADB" shell "pkill -f '[p]ython3 app.py' || true; cd $DEST && setsid -f ./run.sh > /tmp/mirror.log 2>&1 < /dev/null; sleep 4; tail -3 /tmp/mirror.log"
   echo "Started. Log: $ADB shell tail -f /tmp/mirror.log"
   echo "View it from the laptop: $ADB forward tcp:8667 tcp:8666, then open http://localhost:8667"
 fi
