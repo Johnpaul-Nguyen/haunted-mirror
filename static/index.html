@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spirit Board</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="asleep">
+  <div id="veil">
+    <h1>THE BOARD IS VEILED</h1>
+    <p>press any key to lift it</p>
+  </div>
+
+  <main id="stage">
+    <div id="boardwrap">
+      <div id="board">
+        <div class="title">M O R T I S</div>
+        <div class="glyph mark" style="left:330px;top:95px">&#x2739;&#xFE0E;</div>
+        <div class="glyph mark" style="left:670px;top:95px">&#x263E;&#xFE0E;</div>
+        <svg id="planchette" width="130" height="162" viewBox="0 0 130 162">
+          <defs>
+            <radialGradient id="bone" cx="50%" cy="40%" r="70%">
+              <stop offset="0" stop-color="#e2d6bc"/>
+              <stop offset="0.7" stop-color="#a8987a"/>
+              <stop offset="1" stop-color="#5e523e"/>
+            </radialGradient>
+            <radialGradient id="glass" cx="40%" cy="35%" r="70%">
+              <stop offset="0" stop-color="#5a1010" stop-opacity="0.35"/>
+              <stop offset="1" stop-color="#000" stop-opacity="0.75"/>
+            </radialGradient>
+          </defs>
+          <path d="M65 4 C 85 30, 125 80, 122 112 C 119 145, 95 158, 65 158 C 35 158, 11 145, 8 112 C 5 80, 45 30, 65 4 Z"
+                fill="url(#bone)" stroke="#2a1f14" stroke-width="3"/>
+          <circle cx="65" cy="90" r="27" fill="url(#glass)" stroke="#2a1f14" stroke-width="5"/>
+          <ellipse cx="56" cy="80" rx="7" ry="4" fill="#fff" opacity="0.25"/>
+          <circle cx="65" cy="140" r="3" fill="#2a1f14"/>
+        </svg>
+      </div>
+    </div>
+    <div id="asked"></div>
+    <div id="whisper"></div>
+    <form id="ask" autocomplete="off">
+      <span>&#x203A;</span>
+      <input id="q" maxlength="500" placeholder="speak to the board..." disabled>
+    </form>
+  </main>
+
+  <div id="sleep"><p id="sleeptext">the board is cold</p></div>
+
+  <div id="scry" hidden>
+    <img id="scryimg" alt="">
+    <span id="scrylabel">IT SEES NO ONE</span>
+  </div>
+  <div id="hud"></div>
+
+  <div id="scare" aria-hidden="true">
+    <svg viewBox="0 0 400 500">
+      <defs>
+        <filter id="warp">
+          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" result="n">
+            <animate attributeName="baseFrequency" values="0.018;0.03;0.012" dur="0.4s" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="26"/>
+        </filter>
+        <radialGradient id="skin" cx="50%" cy="40%" r="60%">
+          <stop offset="0" stop-color="#d8d2c6"/>
+          <stop offset="0.6" stop-color="#8d877c"/>
+          <stop offset="1" stop-color="#1a1816"/>
+        </radialGradient>
+      </defs>
+      <g filter="url(#warp)">
+        <ellipse cx="200" cy="240" rx="150" ry="210" fill="url(#skin)"/>
+        <ellipse cx="135" cy="195" rx="42" ry="55" fill="#050404" transform="rotate(-12 135 195)"/>
+        <ellipse cx="265" cy="195" rx="42" ry="55" fill="#050404" transform="rotate(12 265 195)"/>
+        <circle cx="140" cy="205" r="6" fill="#ff1a0a"/>
+        <circle cx="260" cy="205" r="6" fill="#ff1a0a"/>
+        <ellipse cx="200" cy="360" rx="38" ry="80" fill="#050404"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="fog"></div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+  <script src="/board.js"></script>
+</body>
+</html>

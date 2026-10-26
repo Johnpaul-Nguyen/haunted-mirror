@@ -1,0 +1,2 @@
+# Only needed for the camera presence detector. Everything else is the standard library.
+opencv-python>=4.8,<5   # 5.x dropped the Haar face detector
