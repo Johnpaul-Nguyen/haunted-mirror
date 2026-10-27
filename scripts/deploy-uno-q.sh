@@ -33,7 +33,7 @@ git archive --format=tar -o "$CACHE/mirror.tar" HEAD
 "$ADB" shell "mkdir -p $DEST/.pylib /tmp/mirror-wheels"
 "$ADB" push "$CACHE/mirror.tar" /tmp/mirror.tar >/dev/null
 "$ADB" push "$CACHE/wheels/." /tmp/mirror-wheels/ >/dev/null
-[ -f .env ] && "$ADB" push .env "$DEST/.env" >/dev/null
+[ -f .env ] && "$ADB" push .env "$DEST/.env" >/dev/null && "$ADB" shell "chmod 600 $DEST/.env"  # holds the API key
 
 # The board's clock may be wrong without network; silence tar's timestamp warnings.
 "$ADB" shell "cd $DEST && tar -xmf /tmp/mirror.tar && chmod +x run.sh kiosk.sh && \
