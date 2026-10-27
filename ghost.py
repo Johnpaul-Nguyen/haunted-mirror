@@ -52,6 +52,8 @@ def _load_dotenv(path):
 
 
 _load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+if hasattr(__import__("time"), "tzset"):
+    __import__("time").tzset()  # apply TZ from .env (boards often default to UTC)
 
 
 def is_crisis(text):
