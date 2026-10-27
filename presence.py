@@ -124,6 +124,13 @@ class Presence:
         self.profile_det = cascade("haarcascade_profileface.xml")
         smile_det = cascade("haarcascade_smile.xml")
         eye_det = cascade("haarcascade_eye_tree_eyeglasses.xml")  # the plain one misses eyes behind glasses
+        # YuNet (a small neural detector) finds faces the Haar cascades miss: a laptop
+        # camera looking up at someone looking down, glasses, a bright window behind.
+        model = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "face_detection_yunet_2023mar.onnx")
+        self.yunet = None
+        if os.path.exists(model) and hasattr(cv2, "FaceDetectorYN"):
+            self.yunet = cv2.FaceDetectorYN.create(model, "", (480, 360), 0.6)
+        print(f"[presence] face detector: {'YuNet' if self.yunet else 'Haar cascades'}")
 
         backend = cv2.CAP_DSHOW if sys.platform == "win32" else cv2.CAP_ANY
 
@@ -160,10 +167,17 @@ class Presence:
 
     def _detect(self, frame, face_det, smile_det, eye_det):
         # 480 px wide: 320 missed tilted, blurry or backlit faces in testing.
-        gray = cv2.equalizeHist(cv2.cvtColor(cv2.resize(frame, (480, 360)), cv2.COLOR_BGR2GRAY))
-        faces = face_det.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(40, 40))
+        small = cv2.resize(frame, (480, 360))
+        gray = cv2.equalizeHist(cv2.cvtColor(small, cv2.COLOR_BGR2GRAY))
+        if self.yunet is not None:
+            _, found = self.yunet.detect(small)
+            faces = [] if found is None else [
+                (max(0, int(f[0])), max(0, int(f[1])), int(f[2]), int(f[3])) for f in found
+            ]
+        else:
+            faces = face_det.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(40, 40))
         smile, eyes = False, 0
-        if not len(faces):
+        if not len(faces) and self.yunet is None:
             # Turned away? The profile detector only sees one side, so try both.
             faces = self.profile_det.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(40, 40))
             if not len(faces):

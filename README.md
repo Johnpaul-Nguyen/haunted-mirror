@@ -22,7 +22,7 @@ model, so it runs even offline and can't be talked out of it.
 
 | Part | Runs on | Does |
 |---|---|---|
-| Presence | Board (OpenCV face + profile detectors) | Wakes Vesper when you arrive, sleeps her when you leave |
+| Presence | Board (OpenCV YuNet face detector, `models/`, MIT; Haar fallback) | Wakes Vesper when you arrive, sleeps her when you leave |
 | Mood guess | Board (OpenCV smile + eye detectors) | Rough guess: smiling, tired or neutral. No image leaves the board |
 | Conversation | Cloud LLM (DigitalOcean Gradient by default) | The check-in itself, in character |
 | Offline ghost | Board | Scripted check-in when there's no key or no Wi-Fi |
