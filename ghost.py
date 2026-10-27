@@ -106,7 +106,7 @@ class CloudClient:
     def __init__(self):
         self.base_url = os.environ.get("SPIRIT_BASE_URL", "https://inference.do-ai.run/v1").rstrip("/")
         self.api_key = os.environ.get("SPIRIT_API_KEY", "")
-        self.model = os.environ.get("SPIRIT_MODEL", "llama3.3-70b-instruct")
+        self.model = os.environ.get("SPIRIT_MODEL", "deepseek-v4.1-flash")
         self.name = f"cloud:{self.model}"
 
     def chat(self, messages):
@@ -216,6 +216,9 @@ class Ghost:
             content = self.cloud.chat(messages)
         except (OSError, KeyError, IndexError, ValueError) as err:
             print(f"[ghost] cloud failed, going offline: {err}")
+            return None
+        if not (content or "").strip():
+            print("[ghost] cloud returned no text, going offline")
             return None
         self.history = (history + [{"role": "assistant", "content": content}])[-MAX_HISTORY:]
         reply = parse_reply(content)

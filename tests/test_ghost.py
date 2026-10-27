@@ -148,6 +148,15 @@ def test_cloud_failure_falls_back_to_offline():
     assert reply["mood"] == "pleased"
 
 
+@pytest.mark.parametrize("empty", [None, "", "   "])
+def test_empty_cloud_reply_falls_back_to_offline(empty):
+    # Reasoning models can spend the whole token budget thinking and return null content.
+    g = ghost.Ghost(cloud=FakeCloud([empty]))
+    reply = g.ask("I'm great", "")
+    assert reply["source"] == "offline" and reply["mood"] == "pleased"
+    assert g.history == []  # the empty turn isn't kept
+
+
 def test_summon_resets_history():
     cloud = FakeCloud([json.dumps({"say": "a"}), json.dumps({"say": "b"}), json.dumps({"say": "c"})])
     g = ghost.Ghost(cloud=cloud)

@@ -99,7 +99,7 @@ mirror says so, hides the mic button and keeps working by keyboard.
 1. Redeem your credit code in the DigitalOcean control panel (Billing).
 2. Gradient AI → Serverless Inference → create a model access key.
 3. Put it in `.env` as `SPIRIT_API_KEY`. Set `SPIRIT_MODEL` to a model listed on
-   that page (for example `llama3.3-70b-instruct`).
+   that page (tested: `deepseek-v4.1-flash`, fast, cheap and keeps the reply format).
 4. Restart `app.py`. The bottom-left corner shows `CLOUD:<model>` when it's live.
 
 ## Controls
